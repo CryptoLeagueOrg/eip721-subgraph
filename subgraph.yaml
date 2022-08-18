@@ -6,7 +6,7 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: EIP721
-    network: rinkeby
+    network: mainnet
     source:
       abi: EIP721
       startBlock: 5806610
@@ -15,11 +15,11 @@ dataSources:
       apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
-        - Token
-        - TokenContract
-        - Owner
-        - OwnerPerTokenContract
-        - All
+        - eip721_Token
+        - eip721_TokenContract
+        - eip721_Owner
+        - eip721_OwnerPerTokenContract
+        - eip721_All
       abis:
         - name: EIP721
           file: ./abis/All.json
