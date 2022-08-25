@@ -15,11 +15,11 @@ dataSources:
       apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
-        - eip721_Token
-        - eip721_TokenContract
-        - eip721_Owner
-        - eip721_OwnerPerTokenContract
-        - eip721_All
+        - Token
+        - TokenContract
+        - Owner
+        - OwnerPerTokenContract
+        - All
       abis:
         - name: EIP721
           file: ./abis/All.json

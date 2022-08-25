@@ -1,6 +1,8 @@
 import { store, Bytes, BigInt } from '@graphprotocol/graph-ts';
 import { Transfer, EIP721 } from '../generated/EIP721/EIP721';
-import { eip721_Token, eip721_TokenContract, eip721_Owner, eip721_All, eip721_OwnerPerTokenContract } from '../generated/schema';
+import { Token, TokenContract, Owner, All, OwnerPerTokenContract } from '../generated/schema';
+
+// import { log } from '@graphprotocol/graph-ts';
 
 let ZERO_ADDRESS_STRING = '0x0000000000000000000000000000000000000000';
 
@@ -47,16 +49,16 @@ export function handleTransfer(event: Transfer): void {
     let from = event.params.from.toHex();
     let to = event.params.to.toHex();
 
-    let all = eip721_All.load('all');
+    let all = All.load('all');
     if (all == null) {
-        all = new eip721_All('all');
+        all = new All('all');
         all.numOwners = ZERO;
         all.numTokens = ZERO;
         all.numTokenContracts = ZERO;
     }
     
     let contract = EIP721.bind(event.address);
-    let tokenContract = eip721_TokenContract.load(contractId);
+    let tokenContract = TokenContract.load(contractId);
     if(tokenContract == null) {
         // log.error('contract : {}',[event.address.toHexString()]);
         let supportsEIP165Identifier = supportsInterface(contract, '01ffc9a7');
@@ -70,7 +72,7 @@ export function handleTransfer(event: Transfer): void {
             // log.error('NEW CONTRACT eip721Metadata for {} : {}', [event.address.toHex(), supportsEIP721Metadata ? 'true' : 'false']);
         }
         if (supportsEIP721) {
-            tokenContract = new eip721_TokenContract(contractId);
+            tokenContract = new TokenContract(contractId);
             tokenContract.doAllAddressesOwnTheirIdByDefault = false;
             tokenContract.supportsEIP721Metadata = supportsEIP721Metadata;
             tokenContract.numTokens = ZERO;
@@ -100,7 +102,7 @@ export function handleTransfer(event: Transfer): void {
 
         if (from != ZERO_ADDRESS_STRING) { // existing token
             let currentOwnerPerTokenContractId = contractId + '_' + from;
-            let currentOwnerPerTokenContract = eip721_OwnerPerTokenContract.load(currentOwnerPerTokenContractId);
+            let currentOwnerPerTokenContract = OwnerPerTokenContract.load(currentOwnerPerTokenContractId);
             if (currentOwnerPerTokenContract != null) {
                 if (currentOwnerPerTokenContract.numTokens.equals(ONE)) {
                     tokenContract.numOwners = tokenContract.numOwners.minus(ONE);
@@ -109,7 +111,7 @@ export function handleTransfer(event: Transfer): void {
                 currentOwnerPerTokenContract.save();
             }
 
-            let currentOwner = eip721_Owner.load(from);
+            let currentOwner = Owner.load(from);
             if (currentOwner != null) {
                 if (currentOwner.numTokens.equals(ONE)) {
                     all.numOwners = all.numOwners.minus(ONE);
@@ -121,15 +123,15 @@ export function handleTransfer(event: Transfer): void {
         
         
         if(to != ZERO_ADDRESS_STRING) { // transfer
-            let newOwner = eip721_Owner.load(to);
+            let newOwner = Owner.load(to);
             if (newOwner == null) {
-                newOwner = new eip721_Owner(to);
+                newOwner = new Owner(to);
                 newOwner.numTokens = ZERO;
             }
 
-            let eip721Token = eip721_Token.load(id);
+            let eip721Token = Token.load(id);
             if(eip721Token == null) {
-                eip721Token = new eip721_Token(id);
+                eip721Token = new Token(id);
                 eip721Token.contract = tokenContract.id;
                 eip721Token.tokenID = tokenId;
                 eip721Token.mintTime = event.block.timestamp;
@@ -161,9 +163,9 @@ export function handleTransfer(event: Transfer): void {
             newOwner.save();
 
             let newOwnerPerTokenContractId = contractId + '_' + to;
-            let newOwnerPerTokenContract = eip721_OwnerPerTokenContract.load(newOwnerPerTokenContractId);
+            let newOwnerPerTokenContract = OwnerPerTokenContract.load(newOwnerPerTokenContractId);
             if (newOwnerPerTokenContract == null) {
-                newOwnerPerTokenContract = new eip721_OwnerPerTokenContract(newOwnerPerTokenContractId);
+                newOwnerPerTokenContract = new OwnerPerTokenContract(newOwnerPerTokenContractId);
                 newOwnerPerTokenContract.owner = newOwner.id;
                 newOwnerPerTokenContract.contract = tokenContract.id;
                 newOwnerPerTokenContract.numTokens = ZERO;
